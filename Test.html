@@ -1,0 +1,168 @@
+<html>
+<head>
+  <style>
+    /* Style général pour la page */
+    body {
+      background-color: #2c3e50;
+      color: #ecf0f1;
+      font-family: "Arial", sans-serif;
+      text-align: center;
+      margin-top: 50px;
+    }
+
+    /* Conteneur de la roulette */
+    #rouletteContainer {
+      position: relative;
+      width: 400px;
+      height: 400px;
+      margin: 0 auto;
+      border: 5px solid #27ae60;
+      border-radius: 50%;
+    }
+
+    /* Style pour le camembert avec des segments colorés */
+    #wheel {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      background-image: conic-gradient(
+        #f39c12 0deg 60deg,
+        #e74c3c 60deg 120deg,
+        #9b59b6 120deg 180deg,
+        #3498db 180deg 240deg,
+        #2ecc71 240deg 300deg,
+        #f1c40f 300deg 360deg
+      );
+      transform-origin: center;
+      transition: transform 3s ease-out; /* Ajout de la rotation de la roue */
+    }
+
+    /* Aiguille centrée */
+    #pointer {
+      position: absolute;
+      top: 0;
+      left: 50%;
+      width: 5px;
+      height: 200px;
+      background-color: red;
+      transform-origin: bottom center;
+      transform: translateX(-50%);
+      z-index: 2; /* Pour rester au-dessus de la roue */
+      transition: transform 3s ease-out; /* Ajout de la rotation de l'aiguille */
+    }
+
+    /* Barre de progression */
+    #progressBarContainer {
+      width: 80%;
+      background-color: white; /* Fond blanc pour la barre vide */
+      border-radius: 25px;
+      margin: 20px auto;
+      display: none; /* Cachée au départ */
+    }
+
+    #progressBar {
+      width: 0%; /* La barre commence bien à 0% */
+      height: 30px;
+      background-color: #27ae60; /* Barre verte remplie */
+      border-radius: 25px;
+    }
+
+    /* Style pour afficher le fichier en grand */
+    #fileDisplay iframe {
+      width: 100%;
+      height: 90vh;
+      margin-top: 20px;
+    }
+
+    /* Style pour le bouton de démarrage */
+    #startButton {
+      margin-top: 20px;
+      padding: 10px 20px;
+      font-size: 18px;
+      background-color: #2980b9;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+  </style>
+
+  <script>
+    var files = [
+      '',
+      '',
+      '',
+    ];
+
+    function startRoulette() {
+      var pointer = document.getElementById("pointer");
+      var wheel = document.getElementById("wheel");
+      var randomRotation = Math.floor(Math.random() * 360) + 720; // Assurer au moins 2 tours
+
+      // Faire tourner la roue
+      wheel.style.transform = "rotate(" + randomRotation + "deg)";
+      
+      // Faire tourner l'aiguille deux fois plus vite que la roue (donc multiplier par 2)
+      pointer.style.transform = "rotate(" + (randomRotation * 2) + "deg) translateX(-50%)";
+
+      setTimeout(function() {
+        selectFile(randomRotation % 360); // Obtenir la rotation finale
+      }, 3000); // Rotation dure 3 secondes
+    }
+
+    function selectFile(rotation) {
+      var selectedFileIndex = Math.floor(rotation / 60); // Diviser la roue en 6 segments
+      var fileDisplay = document.getElementById("fileDisplay");
+
+      // Supprimer tous les éléments sauf le fichier sélectionné
+      document.getElementById("countdown").style.display = "none";
+      document.getElementById("progressBarContainer").style.display = "none";
+      document.getElementById("rouletteContainer").style.display = "none";
+
+      // Afficher le fichier en grand
+      fileDisplay.innerHTML = "<iframe src='" + files[selectedFileIndex] + "'></iframe>";
+    }
+
+    function startLoading() {
+      var progressBar = document.getElementById("progressBar");
+      var progressBarContainer = document.getElementById("progressBarContainer");
+
+      // Afficher la barre de progression
+      progressBarContainer.style.display = "block";
+      progressBar.style.width = "0%"; // La barre commence bien à 0%
+
+      // Utiliser setTimeout pour s'assurer que le navigateur commence par afficher 0%, puis déclenche la transition
+      setTimeout(function() {
+        progressBar.style.transition = "width 3s linear"; // Ajouter la transition
+        progressBar.style.width = "100%"; // Puis remplir la barre sur 3 secondes
+      }, 100); // Délai de 100ms pour garantir que 0% est rendu avant le changement
+    }
+
+    function start() {
+      document.getElementById("startButton").style.display = "none"; // Masquer le bouton après démarrage
+      startLoading(); // Démarrer la barre de chargement
+      
+      // Lancer la rotation après une petite attente pour synchronisation avec la barre
+      setTimeout(startRoulette, 100); // Ajuster pour démarrer la roulette presque en même temps que la barre
+    }
+  </script>
+</head>
+
+<body>
+  <div id="countdown">Chargement...</div>
+
+  <div id="progressBarContainer">
+    <div id="progressBar"></div>
+  </div>
+
+  <div id="rouletteContainer">
+    <div id="wheel"></div>
+    <div id="pointer"></div>
+  </div>
+
+  <button id="startButton" onclick="start()">Démarrer la roulette</button>
+
+  <div id="fileDisplay"></div>
+</body>
+</html>
